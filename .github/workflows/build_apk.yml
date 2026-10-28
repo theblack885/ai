@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository Code
+    - name: Checkout Code
       uses: actions/checkout@v4
 
     - name: Set up JDK 17
@@ -19,14 +19,14 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Grant Execute Permission for Gradle
-      run: chmod +x gradlew
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
 
     - name: Build APK with Gradle
-      run: ./gradlew assembleDebug
+      run: gradle assembleDebug
 
-    - name: Upload Generated APK
+    - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: uncensored-ai-app
+        name: uncensored-ai-apk
         path: app/build/outputs/apk/debug/app-debug.apk
