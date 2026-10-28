@@ -3,6 +3,8 @@ package com.example.uncensoredai
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +13,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,7 +45,7 @@ interface OllamaApi {
 }
 
 object RetrofitClient {
-    // Yahan apne PC ka local IP address dalein (jaise http://192.168.1.5:11434/)
+    // Apne PC ka local IP yahan dalein (jaise http://192.168.1.5:11434/)
     private const val BASE_URL = "http://YOUR_PC_IP_HERE:11434/"
 
     val api: OllamaApi by lazy {
@@ -57,6 +61,11 @@ class ChatViewModel : ViewModel() {
     val messages = mutableStateListOf<ChatMessage>()
     var isLoading by mutableStateOf(false)
 
+    init {
+        // Welcome message in 2027 AI style
+        messages.add(ChatMessage("ai", "Neural Link Active. Uncensored Mode Enabled. What is your command?"))
+    }
+
     fun sendMessage(userPrompt: String) {
         if (userPrompt.isBlank()) return
         messages.add(ChatMessage("user", userPrompt))
@@ -67,7 +76,7 @@ class ChatViewModel : ViewModel() {
                 val res = RetrofitClient.api.generateResponse(OllamaRequest(prompt = userPrompt))
                 messages.add(ChatMessage("ai", res.response.trim()))
             } catch (e: Exception) {
-                messages.add(ChatMessage("ai", "Error: ${e.localizedMessage ?: "Connection Failed"}"))
+                messages.add(ChatMessage("ai", "Connection Error: Check local server IP. (${e.localizedMessage})"))
             } finally {
                 isLoading = false
             }
@@ -80,7 +89,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF121212)) {
+                // 2027 Obsidian Deep Dark Theme Background
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color(0xFF0A0A0F), Color(0xFF12121A), Color(0xFF050508))
+                            )
+                        )
+                ) {
                     ChatScreen()
                 }
             }
@@ -92,41 +110,100 @@ class MainActivity : ComponentActivity() {
 fun ChatScreen(vm: ChatViewModel = viewModel()) {
     var inputText by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Uncensored AI Assistant", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(12.dp))
-        Divider(color = Color.Gray.copy(alpha = 0.3f))
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // Futuristic Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "NEXUS // UNRESTRICTED",
+                    color = Color(0xFF00E5FF),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 2.sp
+                )
+                Text(
+                    text = "AI Core v2.7 Active",
+                    color = Color.Gray,
+                    fontSize = 10.sp,
+                    letterSpacing = 1.sp
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Color(0xFF00FF66))
+            )
+        }
 
-        LazyColumn(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Divider(color = Color(0xFF2A2A3D), thickness = 1.dp)
+
+        // Chat Messages List
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             items(vm.messages) { msg ->
-                val isUser = msg.role == "user"
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    contentAlignment = if (isUser) Alignment.CenterEnd else Alignment.CenterStart
-                ) {
-                    Surface(
-                        color = if (isUser) Color(0xFF6200EE) else Color(0xFF2C2C2C),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(text = msg.text, color = Color.White, modifier = Modifier.padding(12.dp), fontSize = 14.sp)
-                    }
-                }
+                ModernMessageBubble(msg)
             }
             if (vm.isLoading) {
-                item { Text("AI is thinking...", color = Color.Yellow, fontSize = 12.sp, modifier = Modifier.padding(8.dp)) }
+                item {
+                    Text(
+                        text = "⚡ Processing neural stream...",
+                        color = Color(0xFFFF007F),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
             }
         }
 
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        // Modern Glowing Input Bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             OutlinedTextField(
                 value = inputText,
                 onValueChange = { inputText = it },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Ask anything...", color = Color.Gray) },
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                modifier = Modifier
+                    .weight(1f)
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.horizontalGradient(listOf(Color(0xFF00E5FF), Color(0xFFFF007F))),
+                        shape = RoundedCornerShape(16.dp)
+                    ),
+                placeholder = { Text("Ask anything without restrictions...", color = Color(0xFF6B6B83)) },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color(0x99161622),
+                    unfocusedContainerColor = Color(0x9910101A),
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent
+                )
             )
+
             Spacer(modifier = Modifier.width(8.dp))
+
             Button(
                 onClick = {
                     val p = inputText
@@ -134,9 +211,66 @@ fun ChatScreen(vm: ChatViewModel = viewModel()) {
                     vm.sendMessage(p)
                 },
                 enabled = !vm.isLoading,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF00E5FF),
+                    disabledContainerColor = Color(0xFF2A2A3D)
+                ),
+                modifier = Modifier.height(56.dp)
             ) {
-                Text("Send")
+                Text(
+                    text = "SEND",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ModernMessageBubble(msg: ChatMessage) {
+    val isUser = msg.role == "user"
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = if (isUser) Alignment.CenterEnd else Alignment.CenterStart
+    ) {
+        Surface(
+            color = if (isUser) Color(0xFF1E1E2F) else Color(0xFF13131A),
+            shape = RoundedCornerShape(
+                topStart = 16.dp,
+                topEnd = 16.dp,
+                bottomStart = if (isUser) 16.dp else 2.dp,
+                bottomEnd = if (isUser) 2.dp else 16.dp
+            ),
+            modifier = Modifier
+                .widthIn(max = 300.dp)
+                .border(
+                    width = 1.dp,
+                    color = if (isUser) Color(0xFFFF007F).copy(alpha = 0.5f) else Color(0xFF00E5FF).copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(
+                        topStart = 16.dp,
+                        topEnd = 16.dp,
+                        bottomStart = if (isUser) 16.dp else 2.dp,
+                        bottomEnd = if (isUser) 2.dp else 16.dp
+                    )
+                )
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = if (isUser) "YOU" else "NEXUS AI",
+                    color = if (isUser) Color(0xFFFF007F) else Color(0xFF00E5FF),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = msg.text,
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
             }
         }
     }
