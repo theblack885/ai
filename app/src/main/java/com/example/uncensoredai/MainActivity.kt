@@ -45,8 +45,8 @@ interface OllamaApi {
 }
 
 object RetrofitClient {
-    // Apne PC ka local IP yahan dalein (jaise http://192.168.1.5:11434/)
-    private const val BASE_URL = "http://YOUR_PC_IP_HERE:11434/"
+    // Aapka IP address yahan successfully set kar diya gaya hai
+    private const val BASE_URL = "http://192.168.0.31:11434/"
 
     val api: OllamaApi by lazy {
         Retrofit.Builder()
@@ -62,7 +62,6 @@ class ChatViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
 
     init {
-        // Welcome message in 2027 AI style
         messages.add(ChatMessage("ai", "Neural Link Active. Uncensored Mode Enabled. What is your command?"))
     }
 
@@ -89,7 +88,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                // 2027 Obsidian Deep Dark Theme Background
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -115,7 +113,6 @@ fun ChatScreen(vm: ChatViewModel = viewModel()) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Futuristic Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -147,9 +144,8 @@ fun ChatScreen(vm: ChatViewModel = viewModel()) {
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-        Divider(color = Color(0xFF2A2A3D), thickness = 1.dp)
+        HorizontalDivider(color = Color(0xFF2A2A3D), thickness = 1.dp)
 
-        // Chat Messages List
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -173,7 +169,6 @@ fun ChatScreen(vm: ChatViewModel = viewModel()) {
             }
         }
 
-        // Modern Glowing Input Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
